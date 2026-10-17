@@ -1,0 +1,79 @@
+<form class="contact-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  @if (sentUrl(); as url) {
+    <div class="done" role="status">
+      <p class="done__title">Almost done!</p>
+      <p>
+        WhatsApp has opened with your message typed out. Just press <strong>Send</strong> and I’ll
+        get back to you.
+      </p>
+      <p class="small">
+        Didn’t open? <a [href]="url" target="_blank" rel="noopener">Open WhatsApp</a> or
+        <a [href]="emailUrl()">send it by email instead</a>.
+      </p>
+      <button type="button" class="link" (click)="startOver()">Send another message</button>
+    </div>
+  } @else {
+    <div class="row">
+      <div class="field">
+        <label for="c-name">Your name*</label>
+        <input
+          id="c-name"
+          formControlName="name"
+          autocomplete="name"
+          [attr.aria-invalid]="showError('name')"
+          aria-describedby="c-name-error"
+        />
+        @if (showError('name')) {
+          <p id="c-name-error" class="error">Please enter your name.</p>
+        }
+      </div>
+      <div class="field">
+        <label for="c-business">Business name*</label>
+        <input
+          id="c-business"
+          formControlName="business"
+          autocomplete="organization"
+          [attr.aria-invalid]="showError('business')"
+          aria-describedby="c-business-error"
+        />
+        @if (showError('business')) {
+          <p id="c-business-error" class="error">Please enter your business name.</p>
+        }
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="c-website">Current website or Facebook page</label>
+      <input id="c-website" formControlName="website" inputmode="url" placeholder="Optional" />
+    </div>
+
+    <fieldset class="field">
+      <legend>I’m looking for*</legend>
+      <div class="choices">
+        @for (n of needs; track n) {
+          <label class="choice">
+            <input type="radio" formControlName="need" [value]="n" />
+            <span>{{ n }}</span>
+          </label>
+        }
+      </div>
+    </fieldset>
+
+    <div class="field">
+      <label for="c-message">Tell me about your business</label>
+      <textarea
+        id="c-message"
+        formControlName="message"
+        rows="4"
+        placeholder="What do you sell, and who are your customers?"
+      ></textarea>
+    </div>
+
+    <button type="submit" class="button button--solid submit">
+      <app-icon name="whatsapp" /> Send on WhatsApp
+    </button>
+    <p class="small">
+      This opens WhatsApp with your message filled in. Nothing is sent until you press Send.
+    </p>
+  }
+</form>

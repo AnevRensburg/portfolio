@@ -1,0 +1,354 @@
+<a class="skip-link" routerLink="/" fragment="contact" queryParamsHandling="preserve"
+  >Skip to contact</a
+>
+
+<header class="topbar">
+  <div class="topbar__inner container">
+    <a class="wordmark" href="./" aria-label="{{ site.name }}, home">
+      <span class="wordmark__mark" aria-hidden="true">AJ</span>
+      <span class="wordmark__name">{{ site.name }}</span>
+    </a>
+    <button
+      type="button"
+      class="menu-button"
+      [attr.aria-expanded]="menuOpen()"
+      aria-controls="main-nav"
+      (click)="menuOpen.set(!menuOpen())"
+    >
+      <span class="visually-hidden">Menu</span>
+      <span class="menu-button__bars" [class.is-open]="menuOpen()" aria-hidden="true"></span>
+    </button>
+    <nav id="main-nav" class="nav" [class.is-open]="menuOpen()" aria-label="Main">
+      <ul>
+        @for (
+          link of [
+            ['work', 'Work'],
+            ['services', 'What you get'],
+            ['pricing', 'Pricing'],
+          ];
+          track link[0]
+        ) {
+          <li>
+            <a
+              routerLink="/"
+              [fragment]="link[0]"
+              queryParamsHandling="preserve"
+              (click)="menuOpen.set(false)"
+              >{{ link[1] }}</a
+            >
+          </li>
+        }
+        <li>
+          <a
+            class="button button--outline button--small"
+            routerLink="/"
+            fragment="contact"
+            queryParamsHandling="preserve"
+            (click)="menuOpen.set(false)"
+            >Get a website</a
+          >
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero__grid container">
+      <div class="hero__copy">
+        <p class="eyebrow">Web design · {{ site.location }}</p>
+        <h1 id="hero-title">Websites that make small businesses look big.</h1>
+        <p class="hero__lead">
+          I’m Ané, a web developer in Cape Town. I build fast, modern websites for small businesses,
+          so customers can find you, trust you and order from you, straight from their phones.
+        </p>
+        <div class="hero__actions">
+          <a class="button button--solid" routerLink="/" fragment="work" queryParamsHandling="preserve">
+            See my work
+            <app-icon name="arrow" />
+          </a>
+          <a
+            class="button button--outline"
+            [href]="'https://wa.me/' + site.whatsappNumber"
+            target="_blank"
+            rel="noopener"
+          >
+            <app-icon name="whatsapp" />
+            WhatsApp me
+          </a>
+        </div>
+      </div>
+
+      <div class="hero__stack" aria-hidden="true">
+        <!-- Rendered back to front, so the first project ends up on top of the stack. -->
+        @for (project of stackOrder; track project.id; let i = $index) {
+          <button
+            type="button"
+            tabindex="-1"
+            class="hero__shot"
+            [style.--i]="i"
+            (click)="select(projects.length - 1 - i)"
+            routerLink="/"
+            fragment="work"
+          >
+            <span class="browser-bar"><i></i><i></i><i></i></span>
+            <app-picture
+              [src]="project.images.desktop"
+              alt=""
+              sizes="(min-width: 960px) 560px, 90vw"
+              [priority]="i === projects.length - 1"
+            />
+          </button>
+        }
+      </div>
+    </div>
+
+    <ul class="stats container" aria-label="At a glance">
+      @for (stat of stats; track stat.label) {
+        <li>
+          <strong>{{ stat.value }}</strong>
+          <span>{{ stat.label }}</span>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <section id="work" class="work" aria-labelledby="work-title">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Selected work</p>
+        <h2 id="work-title" class="section-title">Real websites for real businesses</h2>
+        <p class="section-lead">
+          Pick a project to explore it. Hover over (or tap) the screen to scroll through the whole
+          page, or switch to the phone view.
+        </p>
+      </div>
+
+      <div class="work__tabs" role="tablist" aria-label="Projects" (keydown)="onTabKey($event)">
+        @for (project of projects; track project.id; let i = $index) {
+          <button
+            type="button"
+            role="tab"
+            class="work__tab"
+            [id]="'tab-' + project.id"
+            [attr.aria-selected]="i === selectedIndex()"
+            [attr.aria-controls]="'panel'"
+            [tabindex]="i === selectedIndex() ? 0 : -1"
+            [style.--accent]="project.accent"
+            (click)="select(i)"
+          >
+            <span class="work__tab-num">0{{ i + 1 }}</span>
+            <span class="work__tab-name">{{ project.name }}</span>
+            <span class="work__tab-kind">{{ project.kind }}</span>
+          </button>
+        }
+      </div>
+
+      @let p = selected();
+      <div
+        id="panel"
+        class="work__panel"
+        role="tabpanel"
+        [attr.aria-labelledby]="'tab-' + p.id"
+        [style.--accent]="p.accent"
+      >
+        <div class="work__viewer">
+          <div class="toggle" role="group" aria-label="Preview size">
+            <button
+              type="button"
+              [attr.aria-pressed]="view() === 'desktop'"
+              (click)="view.set('desktop')"
+            >
+              <app-icon name="desktop" /> Desktop
+            </button>
+            <button
+              type="button"
+              [attr.aria-pressed]="view() === 'mobile'"
+              (click)="view.set('mobile')"
+            >
+              <app-icon name="mobile" /> Phone
+            </button>
+          </div>
+
+          @if (view() === 'desktop') {
+            <div class="browser" tabindex="0" [attr.aria-label]="p.name + ' home page, desktop'">
+              <div class="browser__bar">
+                <span class="browser-bar"><i></i><i></i><i></i></span>
+                <span class="browser__url">{{ p.urlLabel }}</span>
+              </div>
+              <div class="browser__screen">
+                @for (q of [p]; track q.id) {
+                  <app-picture
+                    class="scroller"
+                    [src]="q.images.full"
+                    [alt]="q.name + ' home page, scrolled from top to bottom'"
+                    sizes="(min-width: 960px) 760px, 92vw"
+                  />
+                }
+              </div>
+            </div>
+          } @else {
+            <div class="phone">
+              @for (q of [p]; track q.id) {
+                <app-picture
+                  [src]="q.images.mobile"
+                  [alt]="q.name + ' home page on a phone'"
+                  sizes="300px"
+                />
+              }
+            </div>
+          }
+        </div>
+
+        <div class="work__info">
+          <p class="work__kind">{{ p.kind }}</p>
+          <h3 class="work__name">{{ p.name }}</h3>
+          <p>{{ p.summary }}</p>
+          <ul class="checklist">
+            @for (h of p.highlights; track h) {
+              <li><app-icon name="check" />{{ h }}</li>
+            }
+          </ul>
+          <ul class="tags" aria-label="Features">
+            @for (t of p.tags; track t) {
+              <li>{{ t }}</li>
+            }
+          </ul>
+          <div class="work__actions">
+            <a class="button button--solid" [href]="p.url" target="_blank" rel="noopener">
+              Visit live site <app-icon name="external" />
+              <span class="visually-hidden">(opens in a new tab)</span>
+            </a>
+            <div class="work__nav">
+              <button type="button" class="round" (click)="select(selectedIndex() - 1)">
+                <app-icon name="arrow" class="flip" />
+                <span class="visually-hidden">Previous project</span>
+              </button>
+              <button type="button" class="round" (click)="select(selectedIndex() + 1)">
+                <app-icon name="arrow" />
+                <span class="visually-hidden">Next project</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="services" class="services" aria-labelledby="services-title">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">What you get</p>
+        <h2 id="services-title" class="section-title">Everything a small business site needs</h2>
+      </div>
+      <ul class="features">
+        @for (f of features; track f.title) {
+          <li class="feature">
+            <app-icon [name]="f.icon" class="feature__icon" />
+            <h3>{{ f.title }}</h3>
+            <p>{{ f.text }}</p>
+          </li>
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="process" aria-labelledby="process-title">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">How it works</p>
+        <h2 id="process-title" class="section-title">From first chat to live site</h2>
+      </div>
+      <ol class="steps">
+        @for (s of steps; track s.title; let i = $index) {
+          <li class="step">
+            <span class="step__num">{{ i + 1 }}</span>
+            <h3>{{ s.title }}</h3>
+            <p>{{ s.text }}</p>
+          </li>
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section id="pricing" class="pricing" aria-labelledby="pricing-title">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Pricing</p>
+        <h2 id="pricing-title" class="section-title">Simple, honest pricing</h2>
+      </div>
+      <div class="plans">
+        <article class="plan plan--main">
+          <h3>New website</h3>
+          <p class="plan__price">{{ prices.website }} <span>once-off</span></p>
+          <ul class="checklist">
+            <li><app-icon name="check" />Designed around your products and brand</li>
+            <li><app-icon name="check" />Works beautifully on phones</li>
+            <li><app-icon name="check" />WhatsApp order or enquiry form</li>
+            <li><app-icon name="check" />Set up for Google and link previews</li>
+          </ul>
+          <a class="button button--solid" routerLink="/" fragment="contact" queryParamsHandling="preserve"
+            >Get started</a
+          >
+        </article>
+        <article class="plan">
+          <h3>Domain name</h3>
+          <p class="plan__price">At cost <span>no markup</span></p>
+          <ul class="checklist">
+            <li><app-icon name="check" />Already have one? I connect it for free</li>
+            <li><app-icon name="check" />Need one? I find and register it for you</li>
+            <li><app-icon name="check" />You pay the registrar’s price, nothing more</li>
+          </ul>
+        </article>
+        <article class="plan">
+          <h3>Changes &amp; updates</h3>
+          <p class="plan__price">{{ prices.maintenancePerHour }} <span>per hour</span></p>
+          <ul class="checklist">
+            <li><app-icon name="check" />New products, prices or photos</li>
+            <li><app-icon name="check" />Quoted upfront, invoiced after</li>
+            <li><app-icon name="check" />Hosting options on request</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact" aria-labelledby="contact-title" tabindex="-1">
+    <div class="contact__grid container">
+      <div class="contact__intro">
+        <p class="eyebrow">Contact</p>
+        <h2 id="contact-title" class="section-title">Let’s build your website</h2>
+        <p class="section-lead">
+          Tell me a little about your business. I usually reply the same day.
+        </p>
+        <ul class="contact__list">
+          <li>
+            <app-icon name="whatsapp" />
+            <a [href]="'https://wa.me/' + site.whatsappNumber" target="_blank" rel="noopener">{{
+              site.phoneDisplay
+            }}</a>
+          </li>
+          <li>
+            <app-icon name="mail" />
+            <a [href]="'mailto:' + site.email">{{ site.email }}</a>
+          </li>
+          <li>
+            <app-icon name="pin" />
+            <span>{{ site.location }}</span>
+          </li>
+        </ul>
+      </div>
+      <app-contact-form />
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer__inner container">
+    <p>© {{ year }} {{ site.name }}</p>
+    <a [href]="site.github" target="_blank" rel="noopener" class="footer__link">
+      <app-icon name="github" /> GitHub
+    </a>
+  </div>
+</footer>
